@@ -40,6 +40,8 @@ class BookController extends AbstractController
     public function addBookReview($bookId, Request $request): JsonResponse
     { 
         $book = $this->bookRepository->findOneBy(['id' => $bookId]);
+        if (!$book) 
+            return new JsonResponse(['status' => 'Book not found'], Response::HTTP_NOT_FOUND);
 
         $data = json_decode($request->getContent(), true);
         $name = $data['name'];
@@ -60,9 +62,8 @@ class BookController extends AbstractController
     public function getBookReviews($bookId): Response
     { 
         $book = $this->bookRepository->findOneBy(['id' => $bookId]);
-
         if (!$book) 
-            throw $this->createNotFoundException('No book found for id '.$id);
+            return new JsonResponse(['status' => 'Book not found'], Response::HTTP_NOT_FOUND);
     	
         $data = $this->toJson($book->getReviews());
         return new Response($data, 200, ['Content-Type' => 'application/json']);
@@ -75,11 +76,12 @@ class BookController extends AbstractController
     public function deleteBookReview($bookId, $reviewId): JsonResponse
     {
         $review = $this->reviewRepository->findOneBy(['id' => $reviewId]);
-        $this->reviewRepository->removeReview($review);
+        if (!$review) 
+            return new JsonResponse(['status' => 'Review not found'], Response::HTTP_NOT_FOUND);
 
+        $this->reviewRepository->removeReview($review);
         return new JsonResponse(['status' => 'Review Id='.$reviewId.' Of Book Id='.$bookId.' deleted'], Response::HTTP_NO_CONTENT);
     }
-
 
     /**
      * @Route("", name="add_book", methods={"POST"})
@@ -97,7 +99,6 @@ class BookController extends AbstractController
         }
 
         $this->bookRepository->saveBook($name, $price, $description);
-
         return new JsonResponse(['status' => 'Book created!'], Response::HTTP_CREATED);
     }
 
@@ -105,9 +106,10 @@ class BookController extends AbstractController
      * @Route("/{id}", name="update_book", methods={"PUT"})
      */
     public function update($id, Request $request): JsonResponse
-    {
-        
+    {    
         $book = $this->bookRepository->findOneBy(['id' => $id]);
+        if (!$book)
+            return new JsonResponse(['status' => 'Book not found'], Response::HTTP_NOT_FOUND);
         $data = json_decode($request->getContent(), true);
         $this->bookRepository->updateBook($book, $data);
 
@@ -131,14 +133,13 @@ class BookController extends AbstractController
     public function show($id)
     {  
         $book = $this->bookRepository->findOneBy(['id' => $id]);
-	if (!$book) 
-            throw $this->createNotFoundException('No book found for id '.$id);
+	if (!$book)
+            return new JsonResponse(['status' => 'Book not found'], Response::HTTP_NOT_FOUND);
     	
         $data = $this->toJson($book);
         return new Response($data, 200, ['Content-Type' => 'application/json']);
         //return new JsonResponse($data, Response::HTTP_OK);
     	// return $this->json(['id'=>$book->getId(), 'name'=>$book->getName()]);
-
     }
 
     /**
@@ -159,8 +160,9 @@ class BookController extends AbstractController
     public function delete($id): JsonResponse
     {   
         $book = $this->bookRepository->findOneBy(['id' => $id]);
+        if (!$book)
+            return new JsonResponse(['status' => 'Book not found'], Response::HTTP_NOT_FOUND);
         $this->bookRepository->removeBook($book);
-
         return new JsonResponse(['status' => 'Book deleted'], Response::HTTP_NO_CONTENT);
     }
 
