@@ -43,7 +43,7 @@ class Book
     protected $updateddate;
 
     /**
-     * @ORM\OneToMany(targetEntity="Review", mappedBy="book")
+     * @ORM\OneToMany(targetEntity="Review", mappedBy="book", cascade={"persist"})
      */
     protected $reviews;
 
