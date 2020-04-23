@@ -20,27 +20,22 @@ class Book
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $name;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $price;
+    private $title;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $description;
+    private $content;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    protected $inserteddate;
+    protected $createdOn;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    protected $updateddate;
+    protected $updatedOn;
 
     /**
      * @ORM\OneToMany(targetEntity="Review", mappedBy="book", cascade={"persist"})
@@ -91,62 +86,50 @@ class Book
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getTitle(): ?string
     {
-        return $this->name;
+        return $this->title;
     }
 
-    public function setName(string $name): self
+    public function setTitle(string $title): self
     {
-        $this->name = $name;
+        $this->title = $title;
 
         return $this;
     }
 
-    public function getPrice(): ?int
+    public function getContent(): ?string
     {
-        return $this->price;
+        return $this->content;
     }
 
-    public function setPrice(int $price): self
+    public function setContent(string $content): self
     {
-        $this->price = $price;
+        $this->content = $content;
 
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getCreatedOn()
     {
-        return $this->description;
+        return $this->createdOn;
     }
 
-    public function setDescription(string $description): self
+    public function setCreatedOn($createdOn)
     {
-        $this->description = $description;
+        $this->createdOn = $createdOn;
 
         return $this;
     }
 
-    public function getInserteddate()
+    public function getUpdatedOn()
     {
-        return $this->inserteddate;
+        return $this->updatedOn;
     }
 
-    public function setInserteddate($inserteddate)
+    public function setUpdatedOn($updatedOn)
     {
-        $this->inserteddate = $inserteddate;
-
-        return $this;
-    }
-
-    public function getUpdateddate()
-    {
-        return $this->updateddate;
-    }
-
-    public function setUpdateddate($updateddate)
-    {
-        $this->updateddate = $updateddate;
+        $this->updatedOn = $updatedOn;
 
         return $this;
     }

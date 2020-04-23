@@ -23,19 +23,24 @@ class Review
     private $name;
 
     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $email;
+
+    /**
      * @ORM\Column(type="text")
      */
-    private $description;
+    private $content;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    protected $inserteddate;
+    protected $createdOn;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    protected $updateddate;
+    protected $updatedOn;
 
 
     /**
@@ -84,38 +89,50 @@ class Review
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getEmail(): ?string
     {
-        return $this->description;
+        return $this->email;
     }
 
-    public function setDescription(string $description): self
+    public function setEmail(string $email): self
     {
-        $this->description = $description;
+        $this->email = $email;
 
         return $this;
     }
 
-    public function getInserteddate()
+    public function getContent(): ?string
     {
-        return $this->inserteddate;
+        return $this->content;
     }
 
-    public function setInserteddate($inserteddate)
+    public function setContent(string $content): self
     {
-        $this->inserteddate = $inserteddate;
+        $this->content = $content;
 
         return $this;
     }
 
-    public function getUpdateddate()
+    public function getCreatedOn()
     {
-        return $this->updateddate;
+        return $this->createdOn;
     }
 
-    public function setUpdateddate($updateddate)
+    public function setCreatedOn($createdOn)
     {
-        $this->updateddate = $updateddate;
+        $this->createdOn = $createdOn;
+
+        return $this;
+    }
+
+    public function getUpdatedOn()
+    {
+        return $this->updatedOn;
+    }
+
+    public function setUpdatedOn($updatedOn)
+    {
+        $this->updatedOn = $updatedOn;
 
         return $this;
     }

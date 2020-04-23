@@ -18,13 +18,14 @@ class ReviewRepository extends ServiceEntityRepository
         $this->manager = $manager;
     }
 
-    public function saveReview(Book $book, String $name, String $description)
+    public function saveReview(Book $book, String $name, String $email, String $content)
     {
         $review = new Review();
         $review->setName($name)
-               ->setDescription($description)
-               ->setInserteddate(date_format(new \DateTime(),'d-m-Y'))
-               ->setUpdateddate(date_format(new \DateTime(),'d-m-Y'))
+               ->setEmail($email)
+               ->setContent($content)
+               ->setCreatedOn(date_format(new \DateTime(),'d-m-Y'))
+               ->setUpdatedOn(date_format(new \DateTime(),'d-m-Y'))
                ->setBook($book);
         $this->manager->persist($review);
         $this->manager->flush(); 
@@ -34,8 +35,9 @@ class ReviewRepository extends ServiceEntityRepository
     public function updateReview(Review $review, $data)
     {
         empty($data['name']) ? true : $review->setName($data['name']);
-        empty($data['description']) ? true : $review->setDescription($data['description']);
-        $review->setUpdateddate(date_format(new \DateTime(),'d-m-Y'));
+        empty($data['email']) ? true : $review->setEmail($data['email']);
+        empty($data['content']) ? true : $review->setContent($data['content']);
+        $review->setUpdatedOn(date_format(new \DateTime(),'d-m-Y'));
         $this->manager->flush();
     }
 

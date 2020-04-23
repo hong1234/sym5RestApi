@@ -3,15 +3,17 @@
 namespace App\Controller;
 
 use App\Entity\Book;
-use App\Repository\BookRepository;
 use App\Entity\Review;
+use App\Repository\BookRepository;
 use App\Repository\ReviewRepository;
+
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
+//use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -21,7 +23,7 @@ use Symfony\Component\Serializer\Serializer;
  * Class BookController
  * @package App\Controller
  *
- * @Route(path="/books")
+ * @Route(path="/api/books")
  */
 class BookController extends AbstractController
 {
@@ -37,23 +39,23 @@ class BookController extends AbstractController
     /**
      * @Route("/{bookId}/reviews", name="add_review", methods={"POST"})
      */
-    public function addBookReview($bookId, Request $request): JsonResponse
+    public function addBookReview($bookId, Request $request): Response
     { 
         $book = $this->bookRepository->findOneBy(['id' => $bookId]);
         if (!$book) 
-            return new JsonResponse(['status' => 'Book not found'], Response::HTTP_NOT_FOUND);
+            return new Response(json_encode(['error' => 'Book not found']), Response::HTTP_NOT_FOUND);
 
         $data = json_decode($request->getContent(), true);
         $name = $data['name'];
-        $description = $data['description'];
+        $email = $data['email'];
+        $content = $data['content'];
         
-        if (empty($name) || empty($description)) {
+        if (empty($name) || empty($email) || empty($content))
             throw new NotFoundHttpException('Expecting mandatory parameters!');
-        }
 
-        $savedReview = $this->reviewRepository->saveReview($book, $name, $description);
-        
-        return new JsonResponse(['status' => 'Review Id='.$savedReview->getId().' added!'], Response::HTTP_OK);
+        $savedReview = $this->reviewRepository->saveReview($book, $name, $email, $content);
+        $data = $this->toJson($savedReview);
+        return new Response($data, Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
 
     /**
@@ -63,7 +65,7 @@ class BookController extends AbstractController
     { 
         $book = $this->bookRepository->findOneBy(['id' => $bookId]);
         if (!$book) 
-            return new JsonResponse(['status' => 'Book not found'], Response::HTTP_NOT_FOUND);
+            return new Response(json_encode(['error' => 'Book not found']), Response::HTTP_NOT_FOUND);
     	
         $data = $this->toJson($book->getReviews());
         return new Response($data, 200, ['Content-Type' => 'application/json']);
@@ -71,108 +73,103 @@ class BookController extends AbstractController
     }
 
     /**
-     * @Route("/{bookId}/reviews/{reviewId}", name="delete_book_review", methods={"DELETE"})
+     * @Route("/reviews/{reviewId}", name="delete_book_review", methods={"DELETE"})
      */
-    public function deleteBookReview($bookId, $reviewId): JsonResponse
+    public function deleteBookReview($reviewId): Response
     {
         $review = $this->reviewRepository->findOneBy(['id' => $reviewId]);
-        if (!$review) 
-            return new JsonResponse(['status' => 'Review not found'], Response::HTTP_NOT_FOUND);
-
+        if (!$review)
+            return new Response(json_encode(['error' => 'Review not found']), Response::HTTP_NOT_FOUND);
         $this->reviewRepository->removeReview($review);
-        return new JsonResponse(['status' => 'Review Id='.$reviewId.' Of Book Id='.$bookId.' deleted'], Response::HTTP_NO_CONTENT);
+        return new Response(json_encode(['status' => 'Review Id='.$reviewId.' deleted']), Response::HTTP_OK);
     }
 
     /**
-     * @Route("", name="add_book", methods={"POST"})
+     * @Route("", name="create_book", methods={"POST"})
      */
-    public function add(Request $request): JsonResponse
+    public function createBook(Request $request): Response
     {
         $data = json_decode($request->getContent(), true);
-
-        $name = $data['name'];
-        $price = $data['price'];
-        $description = $data['description'];
-        
-        if (empty($name) || empty($price) || empty($description)) {
+        $title = $data['title'];
+        $content = $data['content'];
+        if (empty($title) || empty($content))
             throw new NotFoundHttpException('Expecting mandatory parameters!');
-        }
 
-        $this->bookRepository->saveBook($name, $price, $description);
-        return new JsonResponse(['status' => 'Book created!'], Response::HTTP_CREATED);
+        $book = $this->bookRepository->saveBook($title, $content);
+        $data = $this->toJson($book);
+        return new Response($data, Response::HTTP_CREATED, ['Content-Type' => 'application/json']);
     }
 
     /**
-     * @Route("/{id}", name="update_book", methods={"PUT"})
+     * @Route("/{bookId}", name="update_book", methods={"PUT"})
      */
-    public function update($id, Request $request): JsonResponse
+    public function updateBook($bookId, Request $request): Response
     {    
-        $book = $this->bookRepository->findOneBy(['id' => $id]);
+        $book = $this->bookRepository->findOneBy(['id' => $bookId]);
         if (!$book)
-            return new JsonResponse(['status' => 'Book not found'], Response::HTTP_NOT_FOUND);
+            return new Response(json_encode(['error' => 'Book not found']), Response::HTTP_NOT_FOUND);
+
         $data = json_decode($request->getContent(), true);
         $this->bookRepository->updateBook($book, $data);
 
-        return new JsonResponse(['status' => 'Book updated!'], Response::HTTP_OK);
+        $data = $this->toJson($book);
+        return new Response($data, Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
 
     /**
      * @Route("", name="all_books", methods={"GET"})
      */
-    public function getAll(): Response
+    public function getAllBooks(): Response
     {
     	$books = $this->bookRepository->findAll();
         $data = $this->toJson($books);
-        //return new JsonResponse($data, Response::HTTP_OK);
-        return new Response($data, 200, ['Content-Type' => 'application/json']);
+        return new Response($data, Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
 
     /**
-     * @Route("/{id}", name="show_book", methods={"GET"})
+     * @Route("/{bookId<\d+>}", name="show_book", methods={"GET"})
      */
-    public function show($id)
+    public function showBook(int $bookId): Response
     {  
-        $book = $this->bookRepository->findOneBy(['id' => $id]);
-	if (!$book)
-            return new JsonResponse(['status' => 'Book not found'], Response::HTTP_NOT_FOUND);
+        $book = $this->bookRepository->findOneBy(['id' => $bookId]);
+	    if (!$book)
+            return new Response(json_encode(['error' => 'Book not found']), Response::HTTP_NOT_FOUND);
     	
         $data = $this->toJson($book);
-        return new Response($data, 200, ['Content-Type' => 'application/json']);
-        //return new JsonResponse($data, Response::HTTP_OK);
-    	// return $this->json(['id'=>$book->getId(), 'name'=>$book->getName()]);
+        return new Response($data, Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
 
     /**
-     * @Route("/search/byname", name="search_book_byname", methods={"GET"})
+     * @Route("/search", name="search_book_title", methods={"GET"})
      */
-    public function search(Request $request)
+    public function searchBookByTitle(Request $request)
     {  
-        $searchkey = $request->query->get('name');
-	$books = $this->bookRepository->searchBook($searchkey);
+        $searchkey = $request->query->get('title');
+	    $books = $this->bookRepository->searchBook($searchkey);
         $data = $this->toJson($books);
-        return new Response($data, 200, ['Content-Type' => 'application/json']);
-        //return new JsonResponse($data, Response::HTTP_OK);
+        return new Response($data, Response::HTTP_OK, ['Content-Type' => 'application/json']);
+        
     }
 
     /**
-     * @Route("/{id}", name="delete_book", methods={"DELETE"})
+     * @Route("/{bookId}", name="delete_book", methods={"DELETE"})
      */
-    public function delete($id): JsonResponse
+    public function delete($bookId): Response
     {   
-        $book = $this->bookRepository->findOneBy(['id' => $id]);
+        $book = $this->bookRepository->findOneBy(['id' => $bookId]);
         if (!$book)
-            return new JsonResponse(['status' => 'Book not found'], Response::HTTP_NOT_FOUND);
+            return new Response(json_encode(['error' => 'Book not found']), Response::HTTP_NOT_FOUND);
         $this->bookRepository->removeBook($book);
-        return new JsonResponse(['status' => 'Book deleted'], Response::HTTP_NO_CONTENT);
+        return new Response(json_encode(['status' => 'Book deleted']), Response::HTTP_OK);
     }
 
     public function toJson($items)
     {
         $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
         return $serializer->serialize($items, 'json', [
-		'circular_reference_handler' => function ($object) { return $object->getId(); },
-                'ignored_attributes' => ['book']
-	]);
+		    'circular_reference_handler' => function ($object) { return $object->getId(); },
+            'ignored_attributes' => ['book']
+	    ]);
     }
 
 }

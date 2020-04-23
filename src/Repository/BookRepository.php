@@ -10,34 +10,34 @@ use Doctrine\ORM\EntityManagerInterface;
 class BookRepository extends ServiceEntityRepository
 { 
     private $manager;
+
     public function __construct(ManagerRegistry $registry, EntityManagerInterface $manager)
     {
         parent::__construct($registry, Book::class);
         $this->manager = $manager;
     }
 
-    public function saveBook($name, $price, $description)
+    public function saveBook($title, $content)
     {
         $book = new Book();
-        $book->setName($name)
-             ->setPrice($price)
-             ->setDescription($description)
-             ->setInserteddate(date_format(new \DateTime(),'d-m-Y'))
-             ->setUpdateddate(date_format(new \DateTime(),'d-m-Y'));
+        $book->setTitle($title)
+             ->setContent($content)
+             ->setCreatedOn(date_format(new \DateTime(),'d-m-Y'))
+             ->setUpdatedOn(date_format(new \DateTime(),'d-m-Y'));
 
         $this->manager->persist($book);
-        $this->manager->flush();      
+        $this->manager->flush();  
+        return $book;    
     }
 
     public function updateBook(Book $book, $data)
     {
-        empty($data['name']) ? true : $book->setName($data['name']);
-        empty($data['price']) ? true : $book->setPrice($data['price']);
-        empty($data['description']) ? true : $book->setDescription($data['description']);
-
-        $book->setUpdateddate(date_format(new \DateTime(),'d-m-Y'));
+        empty($data['title']) ? true : $book->setTitle($data['title']);
+        empty($data['content']) ? true : $book->setContent($data['content']);
+        $book->setUpdatedOn(date_format(new \DateTime(),'d-m-Y'));
 
         $this->manager->flush();
+        
     }
 
     public function removeBook(Book $book)
@@ -49,7 +49,7 @@ class BookRepository extends ServiceEntityRepository
     public function searchBook(String $searchkey)
     {
         return $this->createQueryBuilder('b')
-        ->where('b.name LIKE :searchkey')
+        ->where('b.title LIKE :searchkey')
         ->setParameter('searchkey', '%'.$searchkey.'%')
         ->orderBy('b.id', 'ASC')
         ->getQuery()
