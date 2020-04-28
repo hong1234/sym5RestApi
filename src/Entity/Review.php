@@ -42,7 +42,6 @@ class Review
      */
     protected $updatedOn;
 
-
     /**
      * @ORM\ManyToOne(targetEntity="Book", inversedBy="reviews")
      * @ORM\JoinColumn(name="book_id", referencedColumnName="id", nullable=false)
