@@ -34,9 +34,9 @@ class ReviewRepository extends ServiceEntityRepository
 
     public function updateReview(Review $review, $data)
     {
-        empty($data['name']) ? true : $review->setName($data['name']);
-        empty($data['email']) ? true : $review->setEmail($data['email']);
-        empty($data['content']) ? true : $review->setContent($data['content']);
+        $review->setName($data['name']);
+        $review->setEmail($data['email']);
+        $review->setContent($data['content']);
         $review->setUpdatedOn(date_format(new \DateTime(),'d-m-Y'));
         $this->manager->flush();
     }
@@ -47,62 +47,4 @@ class ReviewRepository extends ServiceEntityRepository
         $this->manager->flush();
     }
 
-    //public function searchReview(String $searchkey)
-    //{
-    //    return $this->createQueryBuilder('r')
-    //    ->where('r.description LIKE :searchkey')
-    //    ->setParameter('searchkey', '%'.$searchkey.'%')
-    //    ->orderBy('r.id', 'ASC')
-    //    ->getQuery()
-    //    ->getResult();      
-    //}
-
-    // /**
-    //  * @return Book[] Returns an array of Book objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('b')
-            ->andWhere('b.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('b.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Book
-    {
-        return $this->createQueryBuilder('b')
-            ->andWhere('b.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
-
-    /**
-     * @param $price
-     * @return Book[]
-     */
-    public function findAllLessThanPrice($price): array
-    {
-        // automatically knows to select Books
-        // the "b" is an alias you'll use in the rest of the query
-        $qb = $this->createQueryBuilder('b')
-            ->andWhere('b.price < :price')
-            ->setParameter('price', $price)
-            ->orderBy('b.price', 'ASC')
-            ->getQuery();
-
-        return $qb->execute();
-
-        // to get just one result:
-        // $product = $qb->setMaxResults(1)->getOneOrNullResult();
-    }
 }
