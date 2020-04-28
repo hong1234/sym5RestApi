@@ -2,13 +2,8 @@
 // src/Controller/BookController.php
 namespace App\Controller;
 
-use App\Entity\Book;
-use App\Entity\Review;
 use App\Service\BookService;
-
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
-//use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,7 +21,6 @@ class BookController extends AbstractController
     public function __construct(BookService $bookService)
     {
         $this->bookService = $bookService;
-        
     }
 
     /**
@@ -37,8 +31,7 @@ class BookController extends AbstractController
         $bookReviewsJson = $this->bookService->bookReviews($bookId);
         if ($bookReviewsJson==null) 
             return new Response(json_encode(['error' => 'Book not found']), Response::HTTP_NOT_FOUND);
-        return new Response($bookReviewsJson, 200, ['Content-Type' => 'application/json']);
-       
+        return new Response($bookReviewsJson, 200, ['Content-Type' => 'application/json']);  
     }
 
     /**
@@ -63,8 +56,6 @@ class BookController extends AbstractController
             return new Response(json_encode(['error' => 'Review not found']), Response::HTTP_NOT_FOUND);
         return new Response(json_encode(['status' => 'Review Id='.$reviewId.' deleted']), Response::HTTP_OK);
     }
-
-    /////////////////
 
      /**
      * @Route("/search", name="search_book_title", methods={"GET"})

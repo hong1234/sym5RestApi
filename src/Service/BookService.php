@@ -51,22 +51,16 @@ class BookService
         return 1;
     }
 
-    ///////////
-
     public function searchBookByTitle($searchkey)
     {  
-        //$searchkey = $request->query->get('title');
 	    $books = $this->bookRepository->searchBook($searchkey);
         return $this->toJson($books);
-        //return new Response($data, Response::HTTP_OK, ['Content-Type' => 'application/json']);
-        
     }
 
     public function allBooks()
     {
     	$books = $this->bookRepository->findAll();
         return $this->toJson($books);
-        //return new Response($data, Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
 
     public function getBook(int $bookId)
@@ -74,9 +68,7 @@ class BookService
         $book = $this->bookRepository->findOneBy(['id' => $bookId]);
         if (!$book)
             return null;
-    	
         return $this->toJson($book);
-        
     }
 
     public function addBook($data)
