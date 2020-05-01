@@ -6,7 +6,7 @@ use App\Service\BookService;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+//use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * Class BookController
@@ -14,7 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  *
  * @Route(path="/api/books")
  */
-class BookController extends AbstractController
+class BookController //extends AbstractController
 {
     private $bookService;
    
